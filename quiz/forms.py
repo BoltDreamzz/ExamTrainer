@@ -18,3 +18,22 @@ class QuizForm(forms.Form):
                 widget=forms.RadioSelect(attrs={'class': 'form-check-input'}),
                 required=True
             )
+            
+from django import forms
+from django.contrib.auth.models import User
+
+class UserRegistrationForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput)
+    password2 = forms.CharField(label="Confirm Password", widget=forms.PasswordInput)
+
+    class Meta:
+        model = User
+        fields = ["username", "email", "password"]
+
+    def clean_password2(self):
+        """Check if both passwords match."""
+        password1 = self.cleaned_data.get("password")
+        password2 = self.cleaned_data.get("password2")
+        if password1 and password2 and password1 != password2:
+            raise forms.ValidationError("Passwords don't match.")
+        return password2

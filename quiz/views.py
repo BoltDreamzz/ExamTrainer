@@ -106,3 +106,21 @@ def recommended_questions(request):
 
 def coming_soon(request):
     return render(request, 'quiz/coming_soon.html')
+
+
+from .forms import UserRegistrationForm
+from django.contrib.auth import login
+from django.contrib.auth.models import User
+
+def register(request):
+    if request.method == "POST":
+        form = UserRegistrationForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.set_password(form.cleaned_data["password"])
+            user.save()
+            login(request, user)  # Log the user in after registration
+            return redirect("quiz:index")  # Redirect to home page or dashboard
+    else:
+        form = UserRegistrationForm()
+    return render(request, "registration/register.html", {"form": form})

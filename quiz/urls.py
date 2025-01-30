@@ -1,5 +1,7 @@
 from django.urls import path
 from . import views
+from django.contrib.auth import views as auth_views
+
 
 app_name = 'quiz'
 
@@ -11,4 +13,7 @@ urlpatterns = [
     path('dashboard/', views.user_dashboard, name='user_dashboard'),
     path('recommended_questions/', views.recommended_questions, name='recommended_questions'),
     path('coming_soon/', views.coming_soon, name='coming_soon'),
+    path("accounts/register/", views.register, name="register"),
+    path("accounts/login/", auth_views.LoginView.as_view(template_name="registration/login.html"), name="login"),
+    path("accounts/logout/", auth_views.LogoutView.as_view(), name="logout"),
 ]

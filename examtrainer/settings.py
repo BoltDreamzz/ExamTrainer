@@ -15,7 +15,11 @@ SECRET_KEY = 'django-insecure-h)z-)!p7-c#lk^@2@d7y4(%t(iadodbdk6e=1+6tmqdx4sewov
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['examtrainer-d3bi.onrender.com', '127.0.0.1']
+CSRF_TRUSTED_ORIGINS = [
+    "https://examtrainer-d3bi.onrender.com",
+   
+]
 
 
 # Application definition

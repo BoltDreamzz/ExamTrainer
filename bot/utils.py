@@ -1,22 +1,43 @@
+import os
 import requests
-import chromedriver_autoinstaller  # Auto-install correct ChromeDriver version
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
+import subprocess
 
 def setup_driver():
-    """Set up Chrome WebDriver with automatic driver installation."""
-    chromedriver_autoinstaller.install()  # Ensure ChromeDriver is updated
+    """Setup Chrome WebDriver for Selenium"""
+    chrome_path = "/usr/bin/google-chrome"
+    driver_path = "/usr/bin/chromedriver"
+
+    # Install Chrome if not found
+    if not os.path.exists(chrome_path):
+        print("Installing Google Chrome...")
+        os.system("wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb")
+        os.system("apt install -y ./google-chrome-stable_current_amd64.deb")
+
+    # Install ChromeDriver if not found
+    if not os.path.exists(driver_path):
+        print("Installing ChromeDriver...")
+        os.system("wget https://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip")
+        os.system("unzip chromedriver_linux64.zip -d /usr/bin/")
+        os.system("chmod +x /usr/bin/chromedriver")
+
+    # Set Chrome options for headless mode
     options = webdriver.ChromeOptions()
-    options.add_argument("--headless")  # Run in headless mode (optional)
+    options.binary_location = chrome_path
+    options.add_argument("--headless")  # Run without UI
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
-    return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+
+    # Set up ChromeDriver service
+    service = Service(driver_path)
+    driver = webdriver.Chrome(service=service, options=options)
+    return driver
 
 def apply_to_job(job_url, full_name, email, resume_path):
     """Uses Selenium to apply to a job by filling out forms and uploading a resume."""
@@ -24,40 +45,27 @@ def apply_to_job(job_url, full_name, email, resume_path):
     driver.get(job_url)
 
     try:
-        # Wait for the form fields to load
-        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "form")))
+        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.NAME, "full_name")))
 
-        # Locate form elements dynamically
+        # Fill out the form dynamically
         name_field = driver.find_element(By.NAME, "full_name")
         email_field = driver.find_element(By.NAME, "email")
         resume_field = driver.find_element(By.NAME, "resume")
-        submit_button = driver.find_element(By.NAME, "submit")
 
-        # Fill in the text fields dynamically from input
         name_field.send_keys(full_name)
         email_field.send_keys(email)
-        resume_field.send_keys(resume_path)  # Upload resume
+        resume_field.send_keys(resume_path)
+
+        # Submit the form
+        submit_button = driver.find_element(By.NAME, "submit")
         submit_button.click()
 
         print(f"Successfully applied to {job_url}")
 
-        # Wait for confirmation message or success indication
+        # Wait for confirmation
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "confirmation_message")))
-    
+
     except Exception as e:
         print(f"Error applying to {job_url}: {e}")
-    
-    finally:
-        driver.quit()
 
-def scrape_jobs(website_url, job_title=None):
-    """Scrapes jobs from a website. Filters jobs by title if specified."""
-    response = requests.get(website_url)
-    jobs = [
-        {'title': 'Python Developer', 'company': 'Company A', 'location': 'Remote', 'link': 'https://www.linkedin.com'},
-    ]  # Placeholder data
-    
-    if job_title:
-        jobs = [job for job in jobs if job_title.lower() in job['title'].lower()]
-    
-    return jobs
+    driver.quit()

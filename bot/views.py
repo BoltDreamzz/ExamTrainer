@@ -11,7 +11,7 @@ def dashboard(request):
         if form.is_valid():
             full_name = form.cleaned_data['full_name']
             email = form.cleaned_data['email']
-            resume = form.FILES['resume']
+            resume = request.FILES['resume']
             job_url = form.cleaned_data['job_url']
             job_title = form.cleaned_data['job_title']
             

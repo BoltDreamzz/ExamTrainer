@@ -22,13 +22,25 @@ class QuizForm(forms.Form):
 from django import forms
 from django.contrib.auth.models import User
 
+from django import forms
+from django.contrib.auth.models import User
+
 class UserRegistrationForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput)
-    password2 = forms.CharField(label="Confirm Password", widget=forms.PasswordInput)
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'input input-bordered'})
+    )
+    password2 = forms.CharField(
+        label="Confirm Password", 
+        widget=forms.PasswordInput(attrs={'class': 'input input-bordered'})
+    )
 
     class Meta:
         model = User
         fields = ["username", "email", "password"]
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'input input-bordered'}),
+            'email': forms.EmailInput(attrs={'class': 'input input-bordered'}),
+        }
 
     def clean_password2(self):
         """Check if both passwords match."""

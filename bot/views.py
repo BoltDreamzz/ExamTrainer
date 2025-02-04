@@ -1,7 +1,7 @@
 # views.py
 from django.shortcuts import render, redirect
 from .forms import JobApplicationForm
-from .utils import apply_to_job, scrape_jobs
+from .utils import apply_to_job
 from django.core.files.storage import FileSystemStorage
 
 def dashboard(request):
@@ -38,3 +38,32 @@ def dashboard(request):
     return render(request, 'bot/dashboard.html', {
         'form': form
     })
+
+
+
+from django.shortcuts import render
+from django.http import JsonResponse
+from .forms import EmailForm
+from .email_utils import send_marketing_email  # Updated function
+
+def send_email_view(request):
+    if request.method == "POST":
+        form = EmailForm(request.POST)
+        if form.is_valid():
+            emails = form.cleaned_data["emails"]
+            
+            # Define dynamic context data (e.g., username, promo details)
+            context_data = {
+                "username": "Valued Customer",
+                "promo_code": "DREAMZZ2025",
+                "discount": "20%",
+            }
+
+            # Send the email using the template
+            send_marketing_email(emails, context_data)
+
+            return JsonResponse({"message": "Emails sent successfully!"})
+    else:
+        form = EmailForm()
+
+    return render(request, "bot/send_email.html", {"form": form})

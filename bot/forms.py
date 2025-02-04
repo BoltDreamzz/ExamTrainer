@@ -24,3 +24,25 @@ class JobApplicationForm(forms.Form):
         label="Job Title (optional)", 
         widget=forms.TextInput(attrs={'class': 'input input-bordered'})
     )
+    
+    
+# from django import forms
+
+# class EmailForm(forms.Form):
+#     emails = forms.CharField(widget=forms.Textarea, help_text="Enter one or multiple emails separated by commas.")
+#     htmx_template = forms.CharField(widget=forms.Textarea, help_text="Paste your HTMX email template.")
+#     subject = forms.CharField(max_length=255, initial="Dreamzz Drip Club", help_text="Enter the email subject.")
+
+
+from django import forms
+
+
+class EmailForm(forms.Form):
+    emails = forms.CharField(
+        widget=forms.Textarea(attrs={
+            "class": "form-control p-2 border rounded",
+            "placeholder": "Enter emails separated by commas...",
+            "rows": 3
+        }),
+        help_text="Enter one or multiple emails separated by commas."
+    )

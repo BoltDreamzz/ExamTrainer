@@ -11,6 +11,19 @@ COPY . /examtrainer
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Install Google Chrome
+RUN apt-get update && apt-get install -y wget unzip \
+    && wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+    && dpkg -i google-chrome-stable_current_amd64.deb || apt-get -fy install \
+    && rm google-chrome-stable_current_amd64.deb
+
+# Install ChromeDriver (match the installed Chrome version)
+RUN CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d'.' -f1) && \
+    wget -q "https://chromedriver.storage.googleapis.com/${CHROME_VERSION}.0.5735.90/chromedriver_linux64.zip" -O chromedriver.zip && \
+    unzip chromedriver.zip -d /usr/bin/ && \
+    chmod +x /usr/bin/chromedriver && \
+    rm chromedriver.zip
+
 # Step 5: Migrate the database and collect static files
 RUN python manage.py migrate --noinput
 RUN python manage.py collectstatic --noinput --clear
